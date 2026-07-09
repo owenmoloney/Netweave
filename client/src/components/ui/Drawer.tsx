@@ -19,13 +19,6 @@ export function Drawer({ open, onClose, title, children, isOverlay = false }: Dr
           aria-hidden="true"
         />
       )}
-      {open && !isOverlay && (
-        <div
-          className="fixed inset-0 z-40 hidden bg-black/30 md:block"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
       <aside
         className={`fixed right-0 top-0 z-50 flex h-full flex-col border-l border-white/10 bg-surface shadow-2xl transition-transform duration-300 ease-out ${
           isOverlay ? 'w-full md:w-[400px]' : 'w-[400px]'

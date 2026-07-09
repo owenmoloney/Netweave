@@ -58,7 +58,7 @@ export function SearchBar() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search people and companies…"
+              placeholder="Search people, companies, and career boards…"
               className="flex-1 bg-transparent py-3.5 text-sm text-text-primary outline-none placeholder:text-text-muted"
             />
             <kbd className="hidden rounded border border-white/10 px-1.5 py-0.5 text-xs text-text-muted sm:inline">
@@ -84,12 +84,18 @@ export function SearchBar() {
                         className={`rounded px-1.5 py-0.5 text-xs font-medium ${
                           result.type === 'COMPANY'
                             ? 'bg-accent-secondary/20 text-accent-secondary'
-                            : result.type === 'SELF'
-                              ? 'bg-accent/20 text-accent'
-                              : 'bg-white/10 text-text-muted'
+                            : result.type === 'CAREER_BOARD'
+                              ? 'bg-amber-500/20 text-amber-400'
+                              : result.type === 'SELF'
+                                ? 'bg-accent/20 text-accent'
+                                : 'bg-white/10 text-text-muted'
                         }`}
                       >
-                        {result.type === 'SELF' ? 'You' : result.type[0]}
+                        {result.type === 'SELF'
+                          ? 'You'
+                          : result.type === 'CAREER_BOARD'
+                            ? 'Board'
+                            : result.type[0]}
                       </span>
                       <div>
                         <p className="text-sm font-medium text-text-primary">{result.name}</p>

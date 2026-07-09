@@ -4,15 +4,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   PersonUpdateSchema,
   CompanyUpdateSchema,
+  CareerBoardUpdateSchema,
   type PersonUpdateInput,
   type CompanyUpdateInput,
+  type CareerBoardUpdateInput,
   type Node,
   getNodeDisplayName,
 } from '@netweave/shared';
 import { format } from 'date-fns';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useUpdateNode, useDeleteNode } from '../../api/nodes';
+import { useDeleteEdge } from '../../api/edges';
 import { useGraphStore } from '../../stores/graphStore';
-import { RELATIONSHIP_LABELS } from '../../utils/relationships';
+import { formatEdgeSummary } from '../../utils/edgeContext';
 import { Drawer } from '../ui/Drawer';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
@@ -28,6 +32,33 @@ function Field({ label, value }: { label: string; value: string | null | undefin
   );
 }
 
+function LinkField({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string | null | undefined;
+  href: string;
+}) {
+  if (!value) return null;
+  return (
+    <div>
+      <dt className="text-xs text-text-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm">
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline break-all"
+        >
+          {value}
+        </a>
+      </dd>
+    </div>
+  );
+}
+
 function PersonView({ node }: { node: Node }) {
   const companyName = useGraphStore((s) => {
     if (!node.companyId) return null;
@@ -39,20 +70,40 @@ function PersonView({ node }: { node: Node }) {
       <Field label="Full name" value={node.fullName} />
       <Field label="Job title" value={node.jobTitle} />
       <Field label="Company" value={companyName} />
-      <Field label="Email" value={node.email} />
-      <Field label="LinkedIn" value={node.linkedInUrl} />
+      <LinkField label="Email" value={node.email} href={`mailto:${node.email}`} />
+      <LinkField label="LinkedIn" value={node.linkedInUrl} href={node.linkedInUrl!} />
       <Field label="Notes" value={node.notes} />
     </dl>
   );
 }
 
 function CompanyView({ node }: { node: Node }) {
+  const websiteHref =
+    node.website && !node.website.startsWith('http')
+      ? `https://${node.website}`
+      : (node.website ?? '');
+
   return (
     <dl className="space-y-3">
       <Field label="Name" value={node.companyName} />
       <Field label="Industry" value={node.industry} />
       <Field label="Location" value={node.location} />
-      <Field label="Website" value={node.website} />
+      <LinkField label="Website" value={node.website} href={websiteHref} />
+      <Field label="Notes" value={node.notes} />
+    </dl>
+  );
+}
+
+function CareerBoardView({ node }: { node: Node }) {
+  const websiteHref =
+    node.website && !node.website.startsWith('http')
+      ? `https://${node.website}`
+      : (node.website ?? '');
+
+  return (
+    <dl className="space-y-3">
+      <Field label="Board name" value={node.companyName} />
+      <LinkField label="Website" value={node.website} href={websiteHref} />
       <Field label="Notes" value={node.notes} />
     </dl>
   );
@@ -62,10 +113,19 @@ function EdgeList({ nodeId }: { nodeId: string }) {
   const edges = useGraphStore((s) => s.edges);
   const nodes = useGraphStore((s) => s.nodes);
   const focusNode = useGraphStore((s) => s.focusNode);
+  const openModal = useGraphStore((s) => s.openModal);
+  const deleteEdge = useDeleteEdge();
+
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const connected = Array.from(edges.values()).filter(
     (e) => e.sourceId === nodeId || e.targetId === nodeId,
   );
+
+  const handleDelete = async (edgeId: string) => {
+    await deleteEdge.mutateAsync(edgeId);
+    setConfirmDeleteId(null);
+  };
 
   if (connected.length === 0) {
     return <p className="text-sm text-text-muted">No connections yet.</p>;
@@ -78,12 +138,7 @@ function EdgeList({ nodeId }: { nodeId: string }) {
         const other = nodes.get(otherId);
         if (!other) return null;
 
-        const details: string[] = [];
-        if (edge.howMet) details.push(`Met: ${edge.howMet}`);
-        if (edge.whereMet) details.push(`Where: ${edge.whereMet}`);
-        if (edge.dateOfInteraction) {
-          details.push(`Date: ${format(new Date(edge.dateOfInteraction), 'MMM d, yyyy')}`);
-        }
+        const summary = formatEdgeSummary(edge, nodes);
 
         return (
           <li
@@ -95,23 +150,54 @@ function EdgeList({ nodeId }: { nodeId: string }) {
                 <p className="text-sm font-medium text-text-primary">
                   {getNodeDisplayName(other)}
                 </p>
-                <p className="text-xs text-text-muted">
-                  {RELATIONSHIP_LABELS[edge.relationshipType]} · Strength {edge.strength}/5
-                </p>
-                {edge.whyTalked && (
-                  <p className="mt-1 text-xs text-text-muted">{edge.whyTalked}</p>
+                <p className="text-xs text-text-muted">{summary.headline}</p>
+                {summary.details.length > 0 && (
+                  <p className="mt-1 text-xs text-text-muted">{summary.details.join(' · ')}</p>
                 )}
-                {details.length > 0 && (
-                  <p className="mt-1 text-xs text-text-muted">{details.join(' · ')}</p>
-                )}
-                {edge.followUpNotes && (
-                  <p className="mt-1 text-xs italic text-text-muted">{edge.followUpNotes}</p>
+                {summary.notes && (
+                  <p className="mt-1 text-xs italic text-text-muted">{summary.notes}</p>
                 )}
               </div>
-              <Button size="sm" variant="ghost" onClick={() => focusNode(otherId)}>
-                Go to
-              </Button>
+              <div className="flex shrink-0 flex-col gap-1">
+                <Button size="sm" variant="ghost" onClick={() => focusNode(otherId)}>
+                  Go to
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => openModal('editEdge', { edgeId: edge.id })}
+                  className="rounded p-1 text-text-muted hover:bg-white/5 hover:text-text-primary"
+                  title="Edit connection"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteId(edge.id)}
+                  className="rounded p-1 text-text-muted hover:bg-white/5 hover:text-danger"
+                  title="Delete connection"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
+            {confirmDeleteId === edge.id && (
+              <div className="mt-2 rounded border border-danger/30 bg-danger/10 p-2">
+                <p className="text-xs text-text-primary">Remove this connection?</p>
+                <div className="mt-2 flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => handleDelete(edge.id)}
+                    disabled={deleteEdge.isPending}
+                  >
+                    Delete
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => setConfirmDeleteId(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </li>
         );
       })}
@@ -147,6 +233,10 @@ export function NodeDetailPanel({ isOverlay = false }: { isOverlay?: boolean }) 
     resolver: zodResolver(CompanyUpdateSchema) as Resolver<CompanyUpdateInput>,
   });
 
+  const careerBoardForm = useForm<CareerBoardUpdateInput>({
+    resolver: zodResolver(CareerBoardUpdateSchema) as Resolver<CareerBoardUpdateInput>,
+  });
+
   if (!node) {
     return (
       <Drawer open={false} onClose={closePanel} title="" isOverlay={isOverlay}>
@@ -177,6 +267,12 @@ export function NodeDetailPanel({ isOverlay = false }: { isOverlay?: boolean }) 
         website: node.website ?? '',
         notes: node.notes ?? '',
       });
+    } else if (node.type === 'CAREER_BOARD') {
+      careerBoardForm.reset({
+        companyName: node.companyName ?? '',
+        website: node.website ?? '',
+        notes: node.notes ?? '',
+      });
     }
     setIsEditing(true);
   };
@@ -189,6 +285,11 @@ export function NodeDetailPanel({ isOverlay = false }: { isOverlay?: boolean }) 
       })();
     } else if (node.type === 'COMPANY') {
       await companyForm.handleSubmit(async (data) => {
+        await updateNode.mutateAsync({ id: node.id, data });
+        setIsEditing(false);
+      })();
+    } else if (node.type === 'CAREER_BOARD') {
+      await careerBoardForm.handleSubmit(async (data) => {
         await updateNode.mutateAsync({ id: node.id, data });
         setIsEditing(false);
       })();
@@ -206,7 +307,7 @@ export function NodeDetailPanel({ isOverlay = false }: { isOverlay?: boolean }) 
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent">
-            {node.type.toLowerCase()}
+            {node.type === 'CAREER_BOARD' ? 'career board' : node.type.toLowerCase()}
           </span>
           <span className="text-xs text-text-muted font-mono">
             Updated {format(new Date(node.updatedAt), 'MMM d, yyyy')}
@@ -217,9 +318,10 @@ export function NodeDetailPanel({ isOverlay = false }: { isOverlay?: boolean }) 
           <>
             {node.type === 'PERSON' && <PersonView node={node} />}
             {node.type === 'COMPANY' && <CompanyView node={node} />}
+            {node.type === 'CAREER_BOARD' && <CareerBoardView node={node} />}
             {isSelf && (
               <p className="text-sm text-text-muted">
-                This is you — the anchor of your network. You cannot edit or delete this node.
+                This is you — the anchor of your network. Your connections radiate from here.
               </p>
             )}
           </>
@@ -253,23 +355,27 @@ export function NodeDetailPanel({ isOverlay = false }: { isOverlay?: boolean }) 
             <Input label="Website" {...companyForm.register('website')} />
             <Textarea label="Notes" {...companyForm.register('notes')} />
           </form>
+        ) : node.type === 'CAREER_BOARD' ? (
+          <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+            <Input label="Board name" {...careerBoardForm.register('companyName')} />
+            <Input label="Website" {...careerBoardForm.register('website')} />
+            <Textarea label="Notes" {...careerBoardForm.register('notes')} />
+          </form>
         ) : null}
 
-        {!isSelf && (
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-text-primary">Connections</h3>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => openModal('addEdge', { sourceId: node.id })}
-              >
-                Add Connection
-              </Button>
-            </div>
-            <EdgeList nodeId={node.id} />
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-text-primary">Connections</h3>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => openModal('addEdge', { sourceId: node.id })}
+            >
+              Add Connection
+            </Button>
           </div>
-        )}
+          <EdgeList nodeId={node.id} />
+        </div>
 
         {!isSelf && (
           <div className="flex flex-wrap gap-2 border-t border-white/10 pt-4">

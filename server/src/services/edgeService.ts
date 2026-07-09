@@ -1,5 +1,6 @@
 import type { EdgeCreateInput, EdgeUpdateInput } from '@netweave/shared';
 import type { Node } from '@netweave/shared';
+import { isValidNodeConnection } from '@netweave/shared';
 import { prisma } from '../prisma.js';
 import { serializeEdge } from '../utils/serialize.js';
 
@@ -9,9 +10,7 @@ function emptyToNull(value: string | null | undefined): string | null {
 }
 
 function isValidConnection(source: Node, target: Node): boolean {
-  if (source.id === target.id) return false;
-  if (source.type === 'COMPANY' && target.type === 'COMPANY') return false;
-  return true;
+  return isValidNodeConnection(source, target);
 }
 
 export async function getEdgesForUser(userId: string) {

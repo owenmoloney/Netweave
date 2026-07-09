@@ -45,6 +45,7 @@ enum NodeType {
   SELF
   PERSON
   COMPANY
+  CAREER_BOARD
 }
 
 model Edge {
@@ -78,5 +79,9 @@ enum RelationshipType {
   mentor
   recruiter
   friend
+  applied_via
+  found_listing
+  board_referral
+  board_contact
   other
 }

@@ -70,10 +70,14 @@ export async function createNode(userId: string, input: NodeCreateInput) {
       companyId: input.type === 'PERSON' ? input.companyId ?? null : null,
       email: input.type === 'PERSON' ? emptyToNull(input.email) : null,
       linkedInUrl: input.type === 'PERSON' ? emptyToNull(input.linkedInUrl) : null,
-      companyName: input.type === 'COMPANY' ? input.companyName : null,
+      companyName:
+        input.type === 'COMPANY' || input.type === 'CAREER_BOARD' ? input.companyName : null,
       industry: input.type === 'COMPANY' ? emptyToNull(input.industry) : null,
       location: input.type === 'COMPANY' ? emptyToNull(input.location) : null,
-      website: input.type === 'COMPANY' ? emptyToNull(input.website) : null,
+      website:
+        input.type === 'COMPANY' || input.type === 'CAREER_BOARD'
+          ? emptyToNull(input.website)
+          : null,
       notes: emptyToNull(input.notes),
       posX: position.posX,
       posY: position.posY,

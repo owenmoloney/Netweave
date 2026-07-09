@@ -13,8 +13,9 @@ export interface GraphStore {
   selectedNodeId: string | null;
   hoveredNodeId: string | null;
   isPanelOpen: boolean;
-  modal: 'addPerson' | 'addCompany' | 'addEdge' | null;
+  modal: 'addPerson' | 'addCompany' | 'addCareerBoard' | 'addEdge' | 'editEdge' | null;
   addEdgeSourceId: string | null;
+  editEdgeId: string | null;
   saveStatus: 'saved' | 'saving' | 'error';
   isSearchOpen: boolean;
   focusTarget: { x: number; y: number; scale: number; nodeId: string } | null;
@@ -32,7 +33,10 @@ export interface GraphStore {
   focusNode: (id: string) => void;
   setHoveredNode: (id: string | null) => void;
   setTransform: (t: Partial<Transform>) => void;
-  openModal: (modal: GraphStore['modal'], opts?: { sourceId?: string }) => void;
+  openModal: (
+    modal: GraphStore['modal'],
+    opts?: { sourceId?: string; edgeId?: string },
+  ) => void;
   closeModal: () => void;
   closePanel: () => void;
   setSaveStatus: (status: GraphStore['saveStatus']) => void;
@@ -53,6 +57,7 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   isPanelOpen: false,
   modal: null,
   addEdgeSourceId: null,
+  editEdgeId: null,
   saveStatus: 'saved',
   isSearchOpen: false,
   focusTarget: null,
@@ -161,9 +166,10 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
     set({
       modal,
       addEdgeSourceId: opts?.sourceId ?? null,
+      editEdgeId: opts?.edgeId ?? null,
     }),
 
-  closeModal: () => set({ modal: null, addEdgeSourceId: null }),
+  closeModal: () => set({ modal: null, addEdgeSourceId: null, editEdgeId: null }),
 
   closePanel: () => set({ isPanelOpen: false, selectedNodeId: null }),
 

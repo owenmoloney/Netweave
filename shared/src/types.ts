@@ -1,4 +1,4 @@
-export type NodeType = 'SELF' | 'PERSON' | 'COMPANY';
+export type NodeType = 'SELF' | 'PERSON' | 'COMPANY' | 'CAREER_BOARD';
 
 export type RelationshipType =
   | 'met_at_event'
@@ -8,6 +8,10 @@ export type RelationshipType =
   | 'mentor'
   | 'recruiter'
   | 'friend'
+  | 'applied_via'
+  | 'found_listing'
+  | 'board_referral'
+  | 'board_contact'
   | 'other';
 
 export interface Node {
@@ -71,5 +75,17 @@ export function getInitials(name: string): string {
 export function getNodeDisplayName(node: Node): string {
   if (node.type === 'SELF') return 'You';
   if (node.type === 'PERSON') return node.fullName ?? 'Unknown';
+  if (node.type === 'CAREER_BOARD') return node.companyName ?? 'Unknown';
   return node.companyName ?? 'Unknown';
+}
+
+/** Returns whether an edge is allowed between two node types. */
+export function isValidNodeConnection(
+  source: Pick<Node, 'id' | 'type'>,
+  target: Pick<Node, 'id' | 'type'>,
+): boolean {
+  if (source.id === target.id) return false;
+  if (source.type === 'COMPANY' && target.type === 'COMPANY') return false;
+  if (source.type === 'CAREER_BOARD' && target.type === 'CAREER_BOARD') return false;
+  return true;
 }

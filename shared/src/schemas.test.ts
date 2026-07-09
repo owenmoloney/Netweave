@@ -4,9 +4,11 @@ import {
   LoginSchema,
   PersonCreateSchema,
   CompanyCreateSchema,
+  CareerBoardCreateSchema,
   EdgeCreateSchema,
   NodePositionSchema,
 } from './schemas';
+import { isValidNodeConnection } from './types';
 
 describe('RegisterSchema', () => {
   it('accepts valid input', () => {
@@ -49,6 +51,54 @@ describe('CompanyCreateSchema', () => {
       companyName: 'Acme Corp',
     });
     expect(result.success).toBe(true);
+  });
+});
+
+describe('CareerBoardCreateSchema', () => {
+  it('accepts valid career board', () => {
+    const result = CareerBoardCreateSchema.safeParse({
+      type: 'CAREER_BOARD',
+      companyName: 'Indeed',
+      website: 'https://www.indeed.com',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects missing board name', () => {
+    const result = CareerBoardCreateSchema.safeParse({
+      type: 'CAREER_BOARD',
+      companyName: '',
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('isValidNodeConnection', () => {
+  it('allows career board to connect to person', () => {
+    expect(
+      isValidNodeConnection(
+        { id: 'a', type: 'CAREER_BOARD' },
+        { id: 'b', type: 'PERSON' },
+      ),
+    ).toBe(true);
+  });
+
+  it('blocks career board to career board', () => {
+    expect(
+      isValidNodeConnection(
+        { id: 'a', type: 'CAREER_BOARD' },
+        { id: 'b', type: 'CAREER_BOARD' },
+      ),
+    ).toBe(false);
+  });
+
+  it('blocks company to company', () => {
+    expect(
+      isValidNodeConnection(
+        { id: 'a', type: 'COMPANY' },
+        { id: 'b', type: 'COMPANY' },
+      ),
+    ).toBe(false);
   });
 });
 

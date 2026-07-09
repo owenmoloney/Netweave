@@ -9,6 +9,7 @@ import { GraphLoadingSkeleton } from '../components/GraphLoadingSkeleton';
 import { DisconnectedState } from '../components/DisconnectedState';
 import { AddNodeModal } from '../components/panels/AddNodeModal';
 import { AddEdgeModal } from '../components/panels/AddEdgeModal';
+import { EditEdgeModal } from '../components/panels/EditEdgeModal';
 import { NodeDetailPanel } from '../components/panels/NodeDetailPanel';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useKeyboard } from '../hooks/useKeyboard';
@@ -93,6 +94,7 @@ export function GraphPage() {
       <SearchBar />
       <AddNodeModal />
       <AddEdgeModal />
+      <EditEdgeModal />
       <ToastContainer />
     </div>
   );

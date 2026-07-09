@@ -150,6 +150,48 @@ function drawNodeLabel(
   ctx.fillText(truncateLabel(label), x, y + radius + 16);
 }
 
+export function drawCareerBoardNode(
+  ctx: CanvasRenderingContext2D,
+  node: SimNode,
+  options: RenderNodeOptions,
+): void {
+  const x = node.x ?? 0;
+  const y = node.y ?? 0;
+  const radius = getNodeRadius(node);
+  const accent = getNodeAccentColor(node);
+  const isSelected = options.selectedId === node.id;
+  const isHovered = options.hoveredId === node.id;
+
+  if (isSelected || isHovered) {
+    applyGlow(ctx, accent, isSelected ? 'selected' : 'hover');
+  }
+
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i - Math.PI / 6;
+    const px = x + radius * Math.cos(angle);
+    const py = y + radius * Math.sin(angle);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = COLORS.careerBoardFill;
+  ctx.fill();
+  ctx.lineWidth = isSelected ? 3 : 2;
+  ctx.strokeStyle = isSelected ? accent : accent;
+  ctx.stroke();
+
+  clearGlow(ctx);
+
+  ctx.fillStyle = COLORS.textPrimary;
+  ctx.font = '600 24px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(getNodeInitials(node), x, y);
+
+  drawNodeLabel(ctx, x, y, radius, getNodeLabel(node));
+}
+
 export function drawNode(
   ctx: CanvasRenderingContext2D,
   node: SimNode,
@@ -164,6 +206,9 @@ export function drawNode(
       break;
     case 'COMPANY':
       drawCompanyNode(ctx, node, options);
+      break;
+    case 'CAREER_BOARD':
+      drawCareerBoardNode(ctx, node, options);
       break;
   }
 }

@@ -45,6 +45,7 @@ beforeEach(() => {
     isPanelOpen: false,
     modal: null,
     addEdgeSourceId: null,
+    editEdgeId: null,
     saveStatus: 'saved',
     isSearchOpen: false,
     focusTarget: null,

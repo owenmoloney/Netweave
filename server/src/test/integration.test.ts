@@ -140,6 +140,59 @@ describe('API integration', () => {
     );
     expect(personEdges).toHaveLength(0);
   });
+
+  it('creates career board and connects to self and person', async () => {
+    const token = await registerAndGetToken('careerboard@example.com');
+
+    const board = await request(app)
+      .post('/api/v1/nodes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        type: 'CAREER_BOARD',
+        companyName: 'Indeed',
+        website: 'https://www.indeed.com',
+      });
+    expect(board.status).toBe(201);
+    expect(board.body.type).toBe('CAREER_BOARD');
+
+    const graph = await request(app)
+      .get('/api/v1/graph')
+      .set('Authorization', `Bearer ${token}`);
+    const self = graph.body.nodes.find((n: { type: string }) => n.type === 'SELF');
+    const person = graph.body.nodes.find((n: { type: string }) => n.type === 'PERSON');
+
+    const selfEdge = await request(app)
+      .post('/api/v1/edges')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        sourceId: self.id,
+        targetId: board.body.id,
+        relationshipType: 'other',
+        strength: 4,
+      });
+    expect(selfEdge.status).toBe(201);
+
+    const personEdge = await request(app)
+      .post('/api/v1/edges')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        sourceId: person.id,
+        targetId: board.body.id,
+        relationshipType: 'recruiter',
+        strength: 3,
+      });
+    expect(personEdge.status).toBe(201);
+
+    const invalidBoardEdge = await request(app)
+      .post('/api/v1/edges')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        sourceId: board.body.id,
+        targetId: board.body.id,
+        relationshipType: 'other',
+      });
+    expect(invalidBoardEdge.status).toBe(400);
+  });
 });
 
 describe('graphService', () => {

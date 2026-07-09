@@ -39,9 +39,19 @@ export const CompanyCreateSchema = z.object({
   posY: z.number().optional(),
 });
 
+export const CareerBoardCreateSchema = z.object({
+  type: z.literal('CAREER_BOARD'),
+  companyName: z.string().min(1, 'Board name is required'),
+  website: z.string().url('Invalid URL').optional().nullable().or(z.literal('')),
+  notes: optionalString,
+  posX: z.number().optional(),
+  posY: z.number().optional(),
+});
+
 export const NodeCreateSchema = z.discriminatedUnion('type', [
   PersonCreateSchema,
   CompanyCreateSchema,
+  CareerBoardCreateSchema,
 ]);
 
 export const PersonUpdateSchema = z.object({
@@ -57,6 +67,12 @@ export const CompanyUpdateSchema = z.object({
   companyName: z.string().min(1).optional(),
   industry: optionalString,
   location: optionalString,
+  website: z.string().url().optional().nullable().or(z.literal('')),
+  notes: optionalString,
+});
+
+export const CareerBoardUpdateSchema = z.object({
+  companyName: z.string().min(1).optional(),
   website: z.string().url().optional().nullable().or(z.literal('')),
   notes: optionalString,
 });
@@ -91,6 +107,10 @@ export const RelationshipTypeSchema = z.enum([
   'mentor',
   'recruiter',
   'friend',
+  'applied_via',
+  'found_listing',
+  'board_referral',
+  'board_contact',
   'other',
 ]);
 
@@ -120,9 +140,11 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type PersonCreateInput = z.infer<typeof PersonCreateSchema>;
 export type CompanyCreateInput = z.infer<typeof CompanyCreateSchema>;
+export type CareerBoardCreateInput = z.infer<typeof CareerBoardCreateSchema>;
 export type NodeCreateInput = z.infer<typeof NodeCreateSchema>;
 export type PersonUpdateInput = z.infer<typeof PersonUpdateSchema>;
 export type CompanyUpdateInput = z.infer<typeof CompanyUpdateSchema>;
+export type CareerBoardUpdateInput = z.infer<typeof CareerBoardUpdateSchema>;
 export type NodeUpdateInput = z.infer<typeof NodeUpdateSchema>;
 export type NodePositionInput = z.infer<typeof NodePositionSchema>;
 export type EdgeCreateInput = z.infer<typeof EdgeCreateSchema>;

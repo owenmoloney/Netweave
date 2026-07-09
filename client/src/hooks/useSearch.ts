@@ -14,6 +14,7 @@ export interface SearchResult {
 function getSearchSubtitle(node: Node): string {
   if (node.type === 'PERSON') return node.jobTitle ?? 'Person';
   if (node.type === 'COMPANY') return node.industry ?? 'Company';
+  if (node.type === 'CAREER_BOARD') return 'Career board';
   return 'You';
 }
 

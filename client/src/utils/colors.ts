@@ -4,8 +4,10 @@ export const COLORS = {
   background: '#070B14',
   accent: '#7C6DEB',
   accentSecondary: '#38BDF8',
+  careerBoard: '#F59E0B',
   personFill: '#1E293B',
   companyFill: '#0F172A',
+  careerBoardFill: '#1C1917',
   textPrimary: '#F1F5F9',
   edgeBase: 'rgba(255,255,255,0.15)',
   edgeHover: 'rgba(255,255,255,0.45)',
@@ -20,6 +22,7 @@ export function getNodeRadius(node: Node): number {
 
 export function getNodeAccentColor(node: Node): string {
   if (node.type === 'COMPANY') return COLORS.accentSecondary;
+  if (node.type === 'CAREER_BOARD') return COLORS.careerBoard;
   return COLORS.accent;
 }
 
@@ -30,7 +33,7 @@ export function getNodeInitials(node: Node): string {
     if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     return node.fullName.slice(0, 2).toUpperCase();
   }
-  if (node.type === 'COMPANY' && node.companyName) {
+  if ((node.type === 'COMPANY' || node.type === 'CAREER_BOARD') && node.companyName) {
     return node.companyName.slice(0, 2).toUpperCase();
   }
   return '?';
@@ -39,5 +42,6 @@ export function getNodeInitials(node: Node): string {
 export function getNodeLabel(node: Node): string {
   if (node.type === 'SELF') return 'You';
   if (node.type === 'PERSON') return node.fullName ?? 'Unknown';
+  if (node.type === 'CAREER_BOARD') return node.companyName ?? 'Unknown';
   return node.companyName ?? 'Unknown';
 }
