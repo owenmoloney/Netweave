@@ -6,7 +6,7 @@ If you discover a security vulnerability in Netweave, please report it responsib
 
 **Do not open a public GitHub issue for security bugs.**
 
-Instead, email the maintainer or open a [GitHub Security Advisory](https://github.com/YOUR_USERNAME/netweave/security/advisories/new) (once the repo is published). Include:
+Instead, email the maintainer or open a [GitHub Security Advisory](https://github.com/owenmoloney/Netweave/security/advisories/new). Include:
 
 - A description of the issue
 - Steps to reproduce

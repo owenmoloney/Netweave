@@ -13,7 +13,7 @@ Netweave is a **single-user, local-first** tool. Your network lives in your own 
 The fastest way to run your own instance:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/netweave.git
+git clone https://github.com/owenmoloney/Netweave.git
 cd netweave
 
 # Set a strong secret before running in production
@@ -31,7 +31,7 @@ To stop: `docker compose down` (your data is kept in the `netweave-data` Docker 
 ## Quick Start (Developers)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/netweave.git
+git clone https://github.com/owenmoloney/Netweave.git
 cd netweave
 npx pnpm@9 install
 
