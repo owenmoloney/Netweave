@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  nodes        Node[]
+  edges        Edge[]
+}
+
+model Node {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NodeType
+  notes       String?
+  posX        Float?
+  posY        Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  fullName    String?
+  jobTitle    String?
+  email       String?
+  linkedInUrl String?
+  companyId   String?
+  companyName String?
+  industry    String?
+  location    String?
+  website     String?
+  edgesFrom   Edge[]   @relation("EdgeSource")
+  edgesTo     Edge[]   @relation("EdgeTarget")
+
+  @@index([userId])
+}
+
+enum NodeType {
+  SELF
+  PERSON
+  COMPANY
+}
+
+model Edge {
+  id                String           @id @default(uuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceId          String
+  source            Node             @relation("EdgeSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  targetId          String
+  target            Node             @relation("EdgeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  relationshipType  RelationshipType @default(other)
+  howMet            String?
+  whereMet          String?
+  whyTalked         String?
+  dateOfInteraction DateTime?
+  strength          Int              @default(3)
+  followUpNotes     String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([sourceId])
+  @@index([targetId])
+}
+
+enum RelationshipType {
+  met_at_event
+  colleague
+  intro_by
+  client
+  mentor
+  recruiter
+  friend
+  other
+}

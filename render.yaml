@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: netweave
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_URL
+        value: file:/data/netweave.db
+      - key: CLIENT_DIST_PATH
+        value: /app/client/dist
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+    disk:
+      name: netweave-data
+      mountPath: /data
+      sizeGB: 1

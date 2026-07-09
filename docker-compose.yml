@@ -1,0 +1,18 @@
+services:
+  netweave:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: file:/data/netweave.db
+      CLIENT_DIST_PATH: /app/client/dist
+      CORS_ORIGIN: http://localhost:8080
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production-to-a-random-64-char-string}
+    volumes:
+      - netweave-data:/data
+    restart: unless-stopped
+
+volumes:
+  netweave-data:
