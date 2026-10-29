@@ -44,24 +44,29 @@ export interface GraphStore {
   closeSearch: () => void;
   setFocusTarget: (target: GraphStore['focusTarget']) => void;
   setHoveredEdge: (id: string | null) => void;
+  resetGraph: () => void;
 }
 
 import { create } from 'zustand';
 
-export const useGraphStore = create<GraphStore>((set, get) => ({
-  nodes: new Map(),
-  edges: new Map(),
+const emptyGraphState = {
+  nodes: new Map<string, Node>(),
+  edges: new Map<string, Edge>(),
   transform: { x: 0, y: 0, scale: 1 },
-  selectedNodeId: null,
-  hoveredNodeId: null,
+  selectedNodeId: null as string | null,
+  hoveredNodeId: null as string | null,
   isPanelOpen: false,
-  modal: null,
-  addEdgeSourceId: null,
-  editEdgeId: null,
-  saveStatus: 'saved',
+  modal: null as GraphStore['modal'],
+  addEdgeSourceId: null as string | null,
+  editEdgeId: null as string | null,
+  saveStatus: 'saved' as GraphStore['saveStatus'],
   isSearchOpen: false,
-  focusTarget: null,
-  hoveredEdgeId: null,
+  focusTarget: null as GraphStore['focusTarget'],
+  hoveredEdgeId: null as string | null,
+};
+
+export const useGraphStore = create<GraphStore>((set, get) => ({
+  ...emptyGraphState,
 
   setNodes: (nodes) => set({ nodes: new Map(nodes.map((n) => [n.id, n])) }),
 
@@ -180,4 +185,6 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   closeSearch: () => set({ isSearchOpen: false }),
 
   setFocusTarget: (focusTarget) => set({ focusTarget }),
+
+  resetGraph: () => set({ ...emptyGraphState, nodes: new Map(), edges: new Map() }),
 }));

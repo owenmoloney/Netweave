@@ -5,6 +5,13 @@ import { emptyToNull, mapEdge, mapNode, type EdgeRow, type NodeRow } from './map
 import { throwIfError } from './errors';
 
 export async function fetchGraph(): Promise<GraphResponse> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Not authenticated');
+  }
+
   const [nodesResult, edgesResult] = await Promise.all([
     supabase.from('nodes').select('*'),
     supabase.from('edges').select('*'),

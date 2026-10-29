@@ -62,7 +62,7 @@ export function GraphPage() {
       <Header />
 
       <main className="relative flex-1 overflow-hidden">
-        {isLoading && <GraphLoadingSkeleton />}
+        {(isLoading || !data) && !showDisconnected && <GraphLoadingSkeleton />}
 
         {showDisconnected && (
           <DisconnectedState
@@ -71,7 +71,7 @@ export function GraphPage() {
           />
         )}
 
-        {!showDisconnected && (
+        {!showDisconnected && data && (
           <div
             className="h-full transition-[margin] duration-300"
             style={{ marginRight: panelOffset }}
