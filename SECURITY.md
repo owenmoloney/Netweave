@@ -17,12 +17,12 @@ We aim to acknowledge reports within 72 hours and provide a fix or mitigation pl
 
 ## Sensitive Data
 
-Netweave stores **personal professional contact data** — names, emails, LinkedIn URLs, meeting notes, and relationship context. When self-hosting:
+Netweave stores **personal professional contact data** — names, emails, LinkedIn URLs, meeting notes, and relationship context.
 
-- Change the default `JWT_SECRET` before exposing the app to a network
-- Run behind HTTPS if accessible outside your local machine
-- Back up your SQLite database file regularly and store backups securely
-- Do not commit `.env` files or `*.db` database files to version control
+- Row Level Security on `nodes` and `edges` is the access control. Verify a second account cannot read the first graph.
+- Never put the Supabase **service role** key in the Vite client or Vercel env. The anon key is public by design.
+- Back up the Supabase database regularly.
+- Do not commit `.env` files to version control.
 
 ## Supported Versions
 

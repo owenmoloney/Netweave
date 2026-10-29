@@ -1,7 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
-import type { Node, NodeCreateInput, NodeUpdateInput, GraphResponse } from '@netweave/shared';
-import { api } from './client';
-import { getApiErrorMessage, revertGraph, snapshotGraph, handleMutationError } from './mutationUtils';
+import type { Node, NodeCreateInput, NodeUpdateInput } from '@netweave/shared';
+import {
+  createNode,
+  deleteNode as deleteNodeRequest,
+  updateNode as updateNodeRequest,
+  updateNodePosition as updateNodePositionRequest,
+} from './client';
+import { handleMutationError, revertGraph, snapshotGraph } from './mutationUtils';
 import { useGraphStore } from '../stores/graphStore';
 
 export function useCreateNode() {
@@ -11,11 +16,8 @@ export function useCreateNode() {
   const setNodes = useGraphStore((s) => s.setNodes);
 
   return useMutation({
-    mutationFn: async (input: NodeCreateInput) => {
-      const { data } = await api.post<Node>('/nodes', input);
-      return data;
-    },
-    onMutate: async (input) => {
+    mutationFn: createNode,
+    onMutate: async (input: NodeCreateInput) => {
       setSaveStatus('saving');
       const snapshot = snapshotGraph();
       const tempId = `temp-${Date.now()}`;
@@ -46,18 +48,13 @@ export function useCreateNode() {
       addNode(optimistic);
       return { snapshot, tempId };
     },
-    onSuccess: async (node, _input, context) => {
+    onSuccess: ({ graph }, _input, context) => {
       if (context?.tempId) {
         useGraphStore.getState().deleteNode(context.tempId);
       }
-      addNode(node);
-
-      const { data: graph } = await api.get<GraphResponse>('/graph');
       setNodes(graph.nodes);
       setEdges(graph.edges);
-
       setSaveStatus('saved');
-      return node;
     },
     onError: (err, _input, context) => {
       if (context?.snapshot) revertGraph(context.snapshot);
@@ -72,8 +69,7 @@ export function useUpdateNode() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: NodeUpdateInput }) => {
-      const { data: node } = await api.patch<Node>(`/nodes/${id}`, data);
-      return node;
+      return updateNodeRequest(id, data);
     },
     onMutate: async ({ id, data }) => {
       setSaveStatus('saving');
@@ -97,10 +93,7 @@ export function useDeleteNode() {
   const setSaveStatus = useGraphStore((s) => s.setSaveStatus);
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/nodes/${id}`);
-      return id;
-    },
+    mutationFn: deleteNodeRequest,
     onMutate: async (id) => {
       setSaveStatus('saving');
       const snapshot = snapshotGraph();
@@ -123,7 +116,7 @@ export function useUpdateNodePosition() {
 
   return useMutation({
     mutationFn: async ({ id, x, y }: { id: string; x: number; y: number }) => {
-      await api.patch(`/nodes/${id}/position`, { x, y });
+      await updateNodePositionRequest(id, x, y);
     },
     onMutate: ({ id, x, y }) => {
       setSaveStatus('saving');
@@ -141,4 +134,4 @@ export function useUpdateNodePosition() {
   });
 }
 
-export { getApiErrorMessage };
+export { getApiErrorMessage } from './errors';

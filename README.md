@@ -2,50 +2,33 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Self-hosted professional network graph** — map people, companies, and how you met them on an interactive force-directed canvas.
+**Personal professional network graph** — map people, companies, and how you met them on an interactive force-directed canvas.
 
-Netweave is a **single-user, local-first** tool. Your network lives in your own database, on your machine or server — not on a shared social platform.
-
----
-
-## Quick Start (Docker)
-
-The fastest way to run your own instance:
-
-```bash
-git clone https://github.com/owenmoloney/Netweave.git
-cd netweave
-
-# Set a strong secret before running in production
-export JWT_SECRET="your-random-64-char-secret"
-
-docker compose up -d
-```
-
-Open **http://localhost:8080**, register an account, and start mapping your network.
-
-To stop: `docker compose down` (your data is kept in the `netweave-data` Docker volume).
+Your graph is private to your account. Data lives in **Supabase Postgres** (survives deploys). The UI is a Vite app you run locally or host on **Vercel**.
 
 ---
 
-## Quick Start (Developers)
+## Quick Start
+
+1. Create a free [Supabase](https://supabase.com) project.
+2. In **SQL Editor**, paste and run `supabase/migrations/20261029120000_init.sql`.
+3. In **Authentication → Providers → Email**, turn off **Confirm email** for personal use (otherwise signup waits on a confirmation mail).
+4. Copy the project URL and anon key from **Project Settings → API**.
 
 ```bash
 git clone https://github.com/owenmoloney/Netweave.git
 cd netweave
 npx pnpm@9 install
 
-cp server/.env.example server/.env
 cp client/.env.example client/.env
+# Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 
-cd server && npx pnpm@9 db:migrate && cd ..
 npx pnpm@9 dev
 ```
 
-- **Client:** http://localhost:5173
-- **API:** http://localhost:3001
+Open **http://localhost:5173**, register an account, and start mapping your network.
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for tests, demo credentials, and architecture.
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for tests and architecture.
 
 ---
 
@@ -66,29 +49,21 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for tests, demo credentials, and 
 
 ---
 
-## Privacy & Self-Hosting
+## Privacy
 
-- All contact data is stored in a **SQLite database you control**
-- Each instance is **private to one user account** — no multi-tenant sharing
-- Change `JWT_SECRET` before exposing the app beyond localhost
-- Use HTTPS if you deploy to a public URL
+- Contact data is stored in **your** Supabase project
+- Row Level Security limits each account to its own nodes and edges
+- Never put the Supabase **service role** key in the frontend or Vercel env
 
-## Backup Your Data
+## Backup
 
-**Docker:** the database file lives in the `netweave-data` volume at `/data/netweave.db` inside the container.
-
-```bash
-# Example: copy DB to your machine
-docker compose cp netweave:/data/netweave.db ./netweave-backup.db
-```
-
-**Local dev:** copy `server/prisma/dev.db` (or your configured `DATABASE_URL` path) regularly.
+Use the Supabase dashboard to export Postgres, or `pg_dump` from the database connection string.
 
 ---
 
 ## Deployment
 
-For cloud hosting (Render, Railway, etc.), persistent storage, and production environment variables, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Vercel hosts the client. Supabase hosts auth and the database. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ---
 

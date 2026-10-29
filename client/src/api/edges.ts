@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import type { Edge, EdgeCreateInput, EdgeUpdateInput } from '@netweave/shared';
-import { api } from './client';
-import { revertGraph, snapshotGraph, handleMutationError } from './mutationUtils';
+import { createEdge, deleteEdge as deleteEdgeRequest, updateEdge as updateEdgeRequest } from './edgeApi';
+import { handleMutationError, revertGraph, snapshotGraph } from './mutationUtils';
 import { useGraphStore } from '../stores/graphStore';
 
 export function useCreateEdge() {
@@ -9,11 +9,8 @@ export function useCreateEdge() {
   const setSaveStatus = useGraphStore((s) => s.setSaveStatus);
 
   return useMutation({
-    mutationFn: async (input: EdgeCreateInput) => {
-      const { data } = await api.post<Edge>('/edges', input);
-      return data;
-    },
-    onMutate: async (input) => {
+    mutationFn: createEdge,
+    onMutate: async (input: EdgeCreateInput) => {
       setSaveStatus('saving');
       const snapshot = snapshotGraph();
       const tempId = `temp-edge-${Date.now()}`;
@@ -55,8 +52,7 @@ export function useUpdateEdge() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: EdgeUpdateInput }) => {
-      const { data: edge } = await api.patch<Edge>(`/edges/${id}`, data);
-      return edge;
+      return updateEdgeRequest(id, data);
     },
     onMutate: async ({ id, data }) => {
       setSaveStatus('saving');
@@ -80,10 +76,7 @@ export function useDeleteEdge() {
   const setSaveStatus = useGraphStore((s) => s.setSaveStatus);
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      await api.delete(`/edges/${id}`);
-      return id;
-    },
+    mutationFn: deleteEdgeRequest,
     onMutate: async (id) => {
       setSaveStatus('saving');
       const snapshot = snapshotGraph();

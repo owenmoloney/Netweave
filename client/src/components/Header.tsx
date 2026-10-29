@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ChevronDown, Search, LogOut } from 'lucide-react';
 import { useGraphStore } from '../stores/graphStore';
-import { clearToken } from '../api/client';
+import { supabase } from '../lib/supabase';
 import { Button } from './ui/Button';
 
 function useSearchShortcutLabel(): string {
@@ -47,8 +47,8 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleLogout = () => {
-    clearToken();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/login');
   };
 

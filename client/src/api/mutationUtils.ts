@@ -1,6 +1,7 @@
 import type { Node, Edge } from '@netweave/shared';
 import { useGraphStore } from '../stores/graphStore';
 import { useToastStore } from '../stores/toastStore';
+import { getApiErrorMessage } from './errors';
 
 export function snapshotGraph() {
   const state = useGraphStore.getState();
@@ -17,12 +18,7 @@ export function revertGraph(snapshot: { nodes: Map<string, Node>; edges: Map<str
   });
 }
 
-export function getApiErrorMessage(err: unknown): string {
-  const axiosErr = err as {
-    response?: { data?: { error?: { message?: string } } };
-  };
-  return axiosErr.response?.data?.error?.message ?? 'Something went wrong';
-}
+export { getApiErrorMessage };
 
 export function handleMutationError(err: unknown): void {
   useGraphStore.getState().setSaveStatus('error');

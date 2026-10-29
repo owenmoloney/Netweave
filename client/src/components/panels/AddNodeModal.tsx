@@ -81,7 +81,7 @@ export function AddNodeModal() {
 
   const onSubmitPerson = personForm.handleSubmit(async (data) => {
     try {
-      const node = await createNode.mutateAsync(data);
+      const { node } = await createNode.mutateAsync(data);
       handleClose();
       selectNode(node.id);
     } catch {
@@ -91,7 +91,7 @@ export function AddNodeModal() {
 
   const onSubmitCompany = companyForm.handleSubmit(async (data) => {
     try {
-      const node = await createNode.mutateAsync(data);
+      const { node } = await createNode.mutateAsync(data);
       handleClose();
       selectNode(node.id);
     } catch {
@@ -101,7 +101,7 @@ export function AddNodeModal() {
 
   const onSubmitCareerBoard = careerBoardForm.handleSubmit(async (data) => {
     try {
-      const node = await createNode.mutateAsync(data);
+      const { node } = await createNode.mutateAsync(data);
       handleClose();
       selectNode(node.id);
     } catch {

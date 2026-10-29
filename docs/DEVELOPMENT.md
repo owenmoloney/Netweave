@@ -37,38 +37,28 @@ This document tracks implementation phases for contributors. See [CONTRIBUTING.m
 ## Architecture
 
 ```
-/client   — React frontend (Vite, Tailwind, Zustand, D3 canvas)
-/server   — Express API (Prisma, JWT auth)
-/shared   — Shared types and Zod schemas
+/client     — React frontend (Vite, Tailwind, Zustand, D3 canvas, supabase-js)
+/supabase   — Postgres schema, triggers, and RLS policies
+/shared     — Shared types and Zod schemas
+/server     — Legacy Express + SQLite (not used by the hosted app)
 ```
 
-The full product specification lives in [SPEC.md](SPEC.md).
+The client talks to Supabase Auth and Postgres. There is no separate API process.
+
+The original product specification lives in [SPEC.md](SPEC.md).
 
 ## Local Development
 
 ```bash
-# Install dependencies
 npx pnpm@9 install
-
-# Run database migration
-cd server && npx pnpm@9 db:migrate
-
-# Seed demo user (optional — register also creates demo data)
-npx pnpm@9 db:seed
-
-# Start dev servers (client + server)
-cd .. && npx pnpm@9 dev
+cp client/.env.example client/.env
+# Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+npx pnpm@9 dev
 ```
 
 - **Client:** http://localhost:5173
-- **Server:** http://localhost:3001
 
-### Demo credentials (dev/seed only)
-
-- Email: `demo@netweave.app`
-- Password: `password123`
-
-Or register a new account — a Self node plus demo Person/Company nodes are created automatically.
+Register a new account in the UI. A Self node is created by a database trigger on signup.
 
 ### Running tests
 
