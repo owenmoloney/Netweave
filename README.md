@@ -21,7 +21,8 @@ cd netweave
 npx pnpm@9 install
 
 cp client/.env.example client/.env
-# Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# Set VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+# Optional: VITE_GOOGLE_CLIENT_ID for Import from Google (see docs/DEPLOYMENT.md)
 
 npx pnpm@9 dev
 ```
@@ -46,6 +47,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for tests and architecture.
 - Press **Cmd+K** (Mac) or **Ctrl+K** (Windows/Linux) to fuzzy-search anyone in your network
 - Drag nodes to arrange the graph; positions auto-save
 - Click a node to browse all their connections and jump between contacts
+- **Import from Google** pulls 1:1 and small meetings (plus 2-way email as a check). Large meetings and newsletters are skipped.
 
 ---
 

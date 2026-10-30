@@ -13,8 +13,8 @@ export const COLORS = {
   edgeHover: 'rgba(255,255,255,0.45)',
 } as const;
 
-const PERSON_COMPANY_RADIUS = 36; // 18 + 100%
-const SELF_RADIUS = 53; // 24 + 120%
+const PERSON_COMPANY_RADIUS = 56;
+const SELF_RADIUS = 74;
 
 export function getNodeRadius(node: Node): number {
   return node.type === 'SELF' ? SELF_RADIUS : PERSON_COMPANY_RADIUS;

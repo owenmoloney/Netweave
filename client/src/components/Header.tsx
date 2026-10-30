@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronDown, Search, LogOut } from 'lucide-react';
+import { Plus, ChevronDown, Search, LogOut, CalendarPlus, LayoutGrid } from 'lucide-react';
 import { useGraphStore } from '../stores/graphStore';
 import { supabase } from '../lib/supabase';
 import { Button } from './ui/Button';
@@ -14,7 +14,15 @@ function useSearchShortcutLabel(): string {
   return label;
 }
 
-export function Header() {
+export function Header({
+  onImportGoogle,
+  onOrganize,
+  organizing = false,
+}: {
+  onImportGoogle: () => void;
+  onOrganize: () => void;
+  organizing?: boolean;
+}) {
   const navigate = useNavigate();
   const searchShortcut = useSearchShortcutLabel();
 
@@ -85,6 +93,23 @@ export function Header() {
         </button>
 
         <span className={`text-sm ${saveColor}`}>{saveLabel}</span>
+
+        <Button type="button" variant="secondary" size="sm" className="gap-1" onClick={onImportGoogle}>
+          <CalendarPlus size={14} />
+          <span className="hidden sm:inline">Import</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="gap-1"
+          onClick={onOrganize}
+          disabled={organizing}
+        >
+          <LayoutGrid size={14} />
+          <span className="hidden sm:inline">{organizing ? 'Organizing…' : 'Organize'}</span>
+        </Button>
 
         <div className="relative" ref={addMenuRef}>
           <Button onClick={() => setAddMenuOpen(!addMenuOpen)} className="gap-1">

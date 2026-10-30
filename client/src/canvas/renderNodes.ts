@@ -56,7 +56,7 @@ export function drawSelfNode(
   clearGlow(ctx);
 
   ctx.fillStyle = COLORS.textPrimary;
-  ctx.font = 'bold 40px Inter, system-ui, sans-serif';
+  ctx.font = 'bold 48px Inter, system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(getNodeInitials(node), x, y);
@@ -91,7 +91,7 @@ export function drawPersonNode(
   clearGlow(ctx);
 
   ctx.fillStyle = accent;
-  ctx.font = '600 28px Inter, system-ui, sans-serif';
+  ctx.font = '600 32px Inter, system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(getNodeInitials(node), x, y);
@@ -128,7 +128,7 @@ export function drawCompanyNode(
   clearGlow(ctx);
 
   ctx.fillStyle = COLORS.textPrimary;
-  ctx.font = '600 26px Inter, system-ui, sans-serif';
+  ctx.font = '600 30px Inter, system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(getNodeInitials(node), x, y);
@@ -144,10 +144,10 @@ function drawNodeLabel(
   label: string,
 ): void {
   ctx.fillStyle = COLORS.textPrimary;
-  ctx.font = '24px Inter, system-ui, sans-serif';
+  ctx.font = '22px Inter, system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillText(truncateLabel(label), x, y + radius + 16);
+  ctx.fillText(truncateLabel(label), x, y + radius + 10);
 }
 
 export function drawCareerBoardNode(
@@ -184,7 +184,7 @@ export function drawCareerBoardNode(
   clearGlow(ctx);
 
   ctx.fillStyle = COLORS.textPrimary;
-  ctx.font = '600 24px Inter, system-ui, sans-serif';
+  ctx.font = '600 30px Inter, system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(getNodeInitials(node), x, y);

@@ -1,4 +1,5 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
+import type { GraphResponse } from '@netweave/shared';
 import { useGraph } from '../api/graph';
 import { GraphCanvas } from '../canvas/GraphCanvas';
 import { Header } from '../components/Header';
@@ -10,16 +11,22 @@ import { DisconnectedState } from '../components/DisconnectedState';
 import { AddNodeModal } from '../components/panels/AddNodeModal';
 import { AddEdgeModal } from '../components/panels/AddEdgeModal';
 import { EditEdgeModal } from '../components/panels/EditEdgeModal';
+import { GoogleImportModal } from '../components/panels/GoogleImportModal';
 import { NodeDetailPanel } from '../components/panels/NodeDetailPanel';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useKeyboard } from '../hooks/useKeyboard';
 import { useGraphStore } from '../stores/graphStore';
 import { getApiErrorMessage } from '../api/mutationUtils';
+import { organizeGraph } from '../api/organizeGraph';
+import { useToastStore } from '../stores/toastStore';
 
 export function GraphPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useGraph();
+  const [importOpen, setImportOpen] = useState(false);
+  const [organizing, setOrganizing] = useState(false);
   const setNodes = useGraphStore((s) => s.setNodes);
   const setEdges = useGraphStore((s) => s.setEdges);
+  const resetView = useGraphStore((s) => s.resetView);
   const isPanelOpen = useGraphStore((s) => s.isPanelOpen);
   const isSearchOpen = useGraphStore((s) => s.isSearchOpen);
   const openSearch = useGraphStore((s) => s.openSearch);
@@ -54,12 +61,41 @@ export function GraphPage() {
     onEscape: handleEscape,
   });
 
+  const handleImported = useCallback(
+    (graph: GraphResponse) => {
+      setNodes(graph.nodes);
+      setEdges(graph.edges);
+      resetView();
+      void refetch();
+    },
+    [setNodes, setEdges, resetView, refetch],
+  );
+
+  const handleOrganize = useCallback(async () => {
+    setOrganizing(true);
+    try {
+      const graph = await organizeGraph();
+      setNodes(graph.nodes);
+      setEdges(graph.edges);
+      resetView();
+      void refetch();
+    } catch (err) {
+      useToastStore.getState().showToast(getApiErrorMessage(err), 'error');
+    } finally {
+      setOrganizing(false);
+    }
+  }, [setNodes, setEdges, resetView, refetch]);
+
   const panelOffset = isPanelOpen && !isNarrow ? 400 : 0;
   const showDisconnected = isError && !data;
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <Header />
+      <Header
+        onImportGoogle={() => setImportOpen(true)}
+        onOrganize={() => void handleOrganize()}
+        organizing={organizing}
+      />
 
       <main className="relative flex-1 overflow-hidden">
         {(isLoading || !data) && !showDisconnected && <GraphLoadingSkeleton />}
@@ -95,6 +131,7 @@ export function GraphPage() {
       <AddNodeModal />
       <AddEdgeModal />
       <EditEdgeModal />
+      <GoogleImportModal open={importOpen} onOpenChange={setImportOpen} onImported={handleImported} />
       <ToastContainer />
     </div>
   );

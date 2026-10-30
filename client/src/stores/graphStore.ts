@@ -45,6 +45,7 @@ export interface GraphStore {
   setFocusTarget: (target: GraphStore['focusTarget']) => void;
   setHoveredEdge: (id: string | null) => void;
   resetGraph: () => void;
+  resetView: () => void;
 }
 
 import { create } from 'zustand';
@@ -187,4 +188,16 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   setFocusTarget: (focusTarget) => set({ focusTarget }),
 
   resetGraph: () => set({ ...emptyGraphState, nodes: new Map(), edges: new Map() }),
+
+  resetView: () => {
+    const panel = get().isPanelOpen && window.innerWidth >= 768 ? 400 : 0;
+    set({
+      focusTarget: null,
+      transform: {
+        x: (window.innerWidth - panel) / 2,
+        y: (window.innerHeight - 56) / 2,
+        scale: 1,
+      },
+    });
+  },
 }));

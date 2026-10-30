@@ -53,6 +53,7 @@ The original product specification lives in [SPEC.md](SPEC.md).
 npx pnpm@9 install
 cp client/.env.example client/.env
 # Fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# Optional: VITE_GOOGLE_CLIENT_ID (Import from Google)
 npx pnpm@9 dev
 ```
 
